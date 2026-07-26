@@ -18,7 +18,7 @@ args = [
     "--",
     "-O",
     "ihex",
-    "k1012-central.hex",
+    "k1012-rp2350b-spb-central.hex",
 ]
 dependencies = ["install-llvm-tools", "flip-link"]
 
@@ -32,7 +32,7 @@ args = [
     "--",
     "-O",
     "ihex",
-    "k1012-peripheral.hex",
+    "k1012-rp2350b-spb-peripheral.hex",
 ]
 dependencies = ["install-llvm-tools", "flip-link"]
 
@@ -45,9 +45,9 @@ command = "cargo"
 args = [
     "hex-to-uf2",
     "--input-path",
-    "k1012-central.hex",
+    "k1012-rp2350b-spb-central.hex",
     "--output-path",
-    "k1012-central.uf2",
+    "k1012-rp2350b-spb-central.uf2",
     "--family",
     "rp2350-arm-s",
 ]
@@ -62,9 +62,9 @@ command = "cargo"
 args = [
     "hex-to-uf2",
     "--input-path",
-    "k1012-peripheral.hex",
+    "k1012-rp2350b-spb-peripheral.hex",
     "--output-path",
-    "k1012-peripheral.uf2",
+    "k1012-rp2350b-spb-peripheral.uf2",
     "--family",
     "rp2350-arm-s",
 ]

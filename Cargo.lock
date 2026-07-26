@@ -1963,6 +1963,7 @@ checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 [[package]]
 name = "rmk"
 version = "0.8.2"
+source = "git+https://github.com/HaoboGu/rmk.git?branch=main#fe211575308f8d0d1cb2062713f1bc6f5764082c"
 dependencies = [
  "byteorder",
  "cortex-m",
@@ -2000,6 +2001,7 @@ dependencies = [
 [[package]]
 name = "rmk-config"
 version = "0.6.1"
+source = "git+https://github.com/HaoboGu/rmk.git?branch=main#fe211575308f8d0d1cb2062713f1bc6f5764082c"
 dependencies = [
  "config",
  "once_cell",
@@ -2014,6 +2016,7 @@ dependencies = [
 [[package]]
 name = "rmk-macro"
 version = "0.7.1"
+source = "git+https://github.com/HaoboGu/rmk.git?branch=main#fe211575308f8d0d1cb2062713f1bc6f5764082c"
 dependencies = [
  "cargo_toml",
  "darling 0.23.0",
@@ -2028,6 +2031,7 @@ dependencies = [
 [[package]]
 name = "rmk-types"
 version = "0.2.2"
+source = "git+https://github.com/HaoboGu/rmk.git?branch=main#fe211575308f8d0d1cb2062713f1bc6f5764082c"
 dependencies = [
  "bitfield-struct",
  "heapless 0.9.2",
