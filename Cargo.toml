@@ -9,6 +9,10 @@ readme = "../../README.md"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
+[features]
+weact_core = []
+spotbear_mini = []
+
 [dependencies]
 rmk = { git = "https://github.com/HaoboGu/rmk.git", branch = "main", default-features = false, features = ["usb_log", "storage", "vial", "vial_lock", "split", "rp2040" ] }
 embassy-time = { version = "0.5", features = ["defmt"] }

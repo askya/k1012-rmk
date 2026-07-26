@@ -1,4 +1,11 @@
 = Notes when building the firmware
+== Build
+
+# For rp2350_b weact_core
+cargo make uf2
+
+# For rb2350b_mini (spotbear)
+cargo make --profile spotbear uf2
 
 == How to enable usb_log
 === What is usb_log ?

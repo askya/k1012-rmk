@@ -1,3 +1,22 @@
+[config]
+default_to_workspace = false
+additional_profiles = ["spotbear_mini", "weact_core"]
+
+# Valeurs par défaut
+[env]
+board = { value = "spotbear-mini", condition = { env_not_set = ["board"] } }
+features = { value = "spotbear_mini", condition = { env_not_set = ["features"] } }
+
+[env.spotbear_mini]
+board = "spotbear-mini"
+features = "spotbear_mini"
+
+[env.weact_core]
+board = "weact-core"
+features = "weact_core"
+
+# ============================================================
+
 [tasks.install-llvm-tools]
 install_crate = { rustup_component_name = "llvm-tools" }
 
@@ -5,70 +24,66 @@ install_crate = { rustup_component_name = "llvm-tools" }
 install_crate = { crate_name = "flip-link", binary = "flip-link", test_arg = ["-h"] }
 
 [tasks.objcopy-central]
-install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = [
-    "objcopy",
-    "--help",
-] }
+install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = ["objcopy", "--help"] }
 command = "cargo"
 args = [
     "objcopy",
     "--release",
-    "--bin",
-    "central",
+    "--bin", "central",
+    "--features", "${features}",
     "--",
-    "-O",
-    "ihex",
-    "k1012-rp2350b-spb-central.hex",
+    "-O", "ihex",
+    "k1012-${board}-central.hex",
 ]
 dependencies = ["install-llvm-tools", "flip-link"]
 
 [tasks.objcopy-peripheral]
+install_crate = { crate_name = "cargo-binutils", binary = "cargo", test_arg = ["objcopy", "--help"] }
 command = "cargo"
 args = [
     "objcopy",
     "--release",
-    "--bin",
-    "peripheral",
+    "--bin", "peripheral",
+    "--features", "${features}",
     "--",
-    "-O",
-    "ihex",
-    "k1012-rp2350b-spb-peripheral.hex",
+    "-O", "ihex",
+    "k1012-${board}-peripheral.hex",
 ]
 dependencies = ["install-llvm-tools", "flip-link"]
 
 [tasks.uf2-central]
-install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = [
-    "hex-to-uf2",
-    "--help",
-] }
+install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = ["hex-to-uf2", "--help"] }
 command = "cargo"
 args = [
     "hex-to-uf2",
-    "--input-path",
-    "k1012-rp2350b-spb-central.hex",
-    "--output-path",
-    "k1012-rp2350b-spb-central.uf2",
-    "--family",
-    "rp2350-arm-s",
+    "--input-path", "k1012-${board}-central.hex",
+    "--output-path", "k1012-${board}-central.uf2",
+    "--family", "rp2350-arm-s",
 ]
 dependencies = ["objcopy-central"]
 
 [tasks.uf2-peripheral]
-install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = [
-    "hex-to-uf2",
-    "--help",
-] }
+install_crate = { crate_name = "cargo-hex-to-uf2", binary = "cargo", test_arg = ["hex-to-uf2", "--help"] }
 command = "cargo"
 args = [
     "hex-to-uf2",
-    "--input-path",
-    "k1012-rp2350b-spb-peripheral.hex",
-    "--output-path",
-    "k1012-rp2350b-spb-peripheral.uf2",
-    "--family",
-    "rp2350-arm-s",
+    "--input-path", "k1012-${board}-peripheral.hex",
+    "--output-path", "k1012-${board}-peripheral.uf2",
+    "--family", "rp2350-arm-s",
 ]
 dependencies = ["objcopy-peripheral"]
 
 [tasks.uf2]
+dependencies = ["uf2-central", "uf2-peripheral"]
+
+# ============================================================
+# Tâches explicites (alternative aux profiles)
+# ============================================================
+
+[tasks.uf2-spotbear]
+env = { board = "spotbear-mini", features = "spotbear_mini" }
+dependencies = ["uf2-central", "uf2-peripheral"]
+
+[tasks.uf2-weact]
+env = { board = "weact-core", features = "weact_core" }
 dependencies = ["uf2-central", "uf2-peripheral"]

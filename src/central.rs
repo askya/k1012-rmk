@@ -19,7 +19,9 @@ use embassy_rp::usb::{Driver, InterruptHandler};
 use embassy_rp::{bind_interrupts, dma};
 use keymap::{COL, ROW};
 use panic_probe as _;
-use rmk::config::{BehaviorConfig, DeviceConfig, PositionalConfig, RmkConfig, StorageConfig, VialConfig};
+use rmk::config::{
+    BehaviorConfig, DeviceConfig, PositionalConfig, RmkConfig, StorageConfig, VialConfig,
+};
 use rmk::debounce::fast_debouncer::FastDebouncer;
 use rmk::futures::future::join;
 use rmk::host::HostService;
@@ -66,7 +68,69 @@ async fn main(_spawner: Spawner) {
     // Create the usb driver, from the HAL
     let driver = Driver::new(p.USB, Irqs);
 
-    // Pin config
+    // RP2350b core from Weact studio
+    #[cfg(feature = "weact_core")]
+    let direct_pins = [
+        [
+            Some(Input::new(p.PIN_19, Pull::Up)),
+            Some(Input::new(p.PIN_21, Pull::Up)),
+            Some(Input::new(p.PIN_22, Pull::Up)),
+            Some(Input::new(p.PIN_23, Pull::Up)),
+            Some(Input::new(p.PIN_24, Pull::Up)),
+        ],
+        [
+            Some(Input::new(p.PIN_18, Pull::Up)),
+            Some(Input::new(p.PIN_20, Pull::Up)),
+            Some(Input::new(p.PIN_17, Pull::Up)),
+            Some(Input::new(p.PIN_16, Pull::Up)),
+            Some(Input::new(p.PIN_15, Pull::Up)),
+        ],
+        [
+            Some(Input::new(p.PIN_30, Pull::Up)),
+            Some(Input::new(p.PIN_27, Pull::Up)),
+            Some(Input::new(p.PIN_29, Pull::Up)),
+            Some(Input::new(p.PIN_31, Pull::Up)),
+            None,
+        ],
+        [
+            Some(Input::new(p.PIN_35, Pull::Up)),
+            Some(Input::new(p.PIN_33, Pull::Up)),
+            Some(Input::new(p.PIN_34, Pull::Up)),
+            Some(Input::new(p.PIN_36, Pull::Up)),
+            None,
+        ],
+        [
+            Some(Input::new(p.PIN_47, Pull::Up)),
+            Some(Input::new(p.PIN_46, Pull::Up)),
+            Some(Input::new(p.PIN_45, Pull::Up)),
+            Some(Input::new(p.PIN_37, Pull::Up)),
+            None,
+        ],
+        [
+            Some(Input::new(p.PIN_4, Pull::Up)),
+            Some(Input::new(p.PIN_0, Pull::Up)),
+            Some(Input::new(p.PIN_1, Pull::Up)),
+            Some(Input::new(p.PIN_7, Pull::Up)),
+            None,
+        ],
+        [
+            Some(Input::new(p.PIN_8, Pull::Up)),
+            Some(Input::new(p.PIN_12, Pull::Up)),
+            Some(Input::new(p.PIN_9, Pull::Up)),
+            Some(Input::new(p.PIN_10, Pull::Up)),
+            None,
+        ],
+        [
+            Some(Input::new(p.PIN_26, Pull::Up)),
+            Some(Input::new(p.PIN_6, Pull::Up)),
+            Some(Input::new(p.PIN_44, Pull::Up)),
+            Some(Input::new(p.PIN_28, Pull::Up)),
+            None,
+        ],
+    ];
+
+    // RP2350b mini from spotbear
+    #[cfg(feature = "spotbear_mini")]
     let direct_pins = [
         [
             Some(Input::new(p.PIN_10, Pull::Up)),
@@ -149,6 +213,13 @@ async fn main(_spawner: Spawner) {
     let rx_buf = &mut RX_BUF.init([0; SPLIT_MESSAGE_MAX_SIZE])[..];
     static TX_BUF: StaticCell<[u8; SPLIT_MESSAGE_MAX_SIZE]> = StaticCell::new();
     let tx_buf = &mut TX_BUF.init([0; SPLIT_MESSAGE_MAX_SIZE])[..];
+
+    // RP2350b core from Weact studio
+    #[cfg(feature = "weact_core")]
+    let uart = BufferedUart::new_full_duplex(p.PIO0, p.PIN_38, p.PIN_32, tx_buf, rx_buf, Irqs);
+
+    // RP2350b mini from spotbear
+    #[cfg(feature = "spotbear_mini")]
     let uart = BufferedUart::new_full_duplex(p.PIO0, p.PIN_27, p.PIN_26, tx_buf, rx_buf, Irqs);
 
     // Initialize the storage and keymap
@@ -178,7 +249,14 @@ async fn main(_spawner: Spawner) {
 
     // Start
     join(
-        run_all!(matrix, storage, usb_transport, wpm_processor, keyboard, host_service),
+        run_all!(
+            matrix,
+            storage,
+            usb_transport,
+            wpm_processor,
+            keyboard,
+            host_service
+        ),
         run_peripheral_manager::<ROW, COL, 8, 0, _>(0, uart),
     )
     .await;
