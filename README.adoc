@@ -1,0 +1,48 @@
+= Notes when building the firmware
+
+== How to enable usb_log
+=== What is usb_log ?
+USB log is a feature of rmk that allow user to view firmware operations using a serial monitor.
+It is the feature that enable a TTY on your keyboard on the same usb port it is connected to the computer. When connected to this tty, you can see keypresses, errors in your console, matrix scanning, usb connection. That helps when debuging the keyboard.
+
+=== How to enable it ?
+First step is to add `usb_log` to the enabled feature of the rmk dependancy it Cargo.toml.
+
+When enabling usb_log, defmt (an other log feature) must be disabled). That is done by disabling `default-features` in which it is included. Disabling those
+
+.Enable the feature
+Add `usb_log` to rmk features in Cargo.toml,
+[,toml]
+====
+[dependencies]
+# Compiler requires defmt to be disabled when enabling log. default-features = false does it. But it does disable other default feature (storage, vial, vial_lock). They are then specified, which enable them.
+rmk = { path = "../../../rmk", default-features = false , features = ["usb_log", "storage", "vial", "vial_lock", ] }
+====
+
+.Set loglevel
+Open your .cargo/config.toml and make sure the DEFMT_LOG environment variable is set to info (or debug for more detail):
+====
+[env]
+DEFMT_LOG = "info"
+====
+
+.Accees your logs
+When you plug your keyboard into your computer, it will now show up as a virtual COM port (e.g., /dev/ttyACM0 on Linux, COM3 on Windows) in addition to being a keyboard. Use `ls /dev/ttyACM*` to find out.
+
+To read the logs, open a serial monitor on your host computer. For example, on Linux/macOS:
+====
+# Install minicom if you don't have it
+sudo minicom -D /dev/ttyACM1 -b 115200 -o
+or
+# Install screen if you don't have it
+screen /dev/ttyACM0 115200
+====
+
+== Old keymap being used instead of new flashed one
+. Caused by keymap being saved on first flash and not rewrite on the next fashes.
+. How to remediate ? use vial or wipe flash.
+. How to wipe flash ?
+.. Install picotool
+.. Put pico into bootsel mode and connected to you computer
+.. run `sudo ./picotool-2.2.0-a4-x86_64-lin/picotool/picotool erase --all`
+.. Mount the drive and put the firmware on it.
