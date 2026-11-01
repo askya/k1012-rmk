@@ -28,9 +28,9 @@ use rmk::host::HostService;
 use rmk::keyboard::Keyboard;
 use rmk::matrix::direct_pin::DirectPinMatrix;
 use rmk::processor::builtin::wpm::WpmProcessor;
-use rmk::split::SPLIT_MESSAGE_MAX_SIZE;
 use rmk::split::central::run_peripheral_manager;
-use rmk::split::rp::uart::{BufferedUart, UartInterruptHandler};
+use rmk::split::rp::uart::{self, BufferedUart, UartInterruptHandler};
+use rmk::split::{PeripheralMatrixConfig, SPLIT_MESSAGE_MAX_SIZE};
 use rmk::usb::UsbTransport;
 use rmk::{KeymapData, initialize_keymap_and_storage, run_all};
 use static_cell::StaticCell;
@@ -133,18 +133,18 @@ async fn main(_spawner: Spawner) {
     #[cfg(feature = "spotbear_mini")]
     let direct_pins = [
         [
-            Some(Input::new(p.PIN_10, Pull::Up)),
-            Some(Input::new(p.PIN_8, Pull::Up)),
-            Some(Input::new(p.PIN_9, Pull::Up)),
-            Some(Input::new(p.PIN_6, Pull::Up)),
-            Some(Input::new(p.PIN_7, Pull::Up)),
+            Some(Input::new(p.PIN_12, Pull::Up)),
+            Some(Input::new(p.PIN_21, Pull::Up)),
+            Some(Input::new(p.PIN_11, Pull::Up)),
+            Some(Input::new(p.PIN_19, Pull::Up)),
+            Some(Input::new(p.PIN_18, Pull::Up)),
         ],
         [
-            Some(Input::new(p.PIN_18, Pull::Up)),
-            Some(Input::new(p.PIN_21, Pull::Up)),
-            Some(Input::new(p.PIN_19, Pull::Up)),
-            Some(Input::new(p.PIN_11, Pull::Up)),
-            Some(Input::new(p.PIN_12, Pull::Up)),
+            Some(Input::new(p.PIN_7, Pull::Up)),
+            Some(Input::new(p.PIN_8, Pull::Up)),
+            Some(Input::new(p.PIN_6, Pull::Up)),
+            Some(Input::new(p.PIN_10, Pull::Up)),
+            Some(Input::new(p.PIN_9, Pull::Up)),
         ],
         [
             Some(Input::new(p.PIN_33, Pull::Up)),
@@ -216,11 +216,13 @@ async fn main(_spawner: Spawner) {
 
     // RP2350b core from Weact studio
     #[cfg(feature = "weact_core")]
-    let uart = BufferedUart::new_full_duplex(p.PIO0, p.PIN_38, p.PIN_32, tx_buf, rx_buf, Irqs);
+    let uart_receiver =
+        BufferedUart::new_full_duplex(p.PIO0, p.PIN_38, p.PIN_32, tx_buf, rx_buf, Irqs);
 
     // RP2350b mini from spotbear
     #[cfg(feature = "spotbear_mini")]
-    let uart = BufferedUart::new_full_duplex(p.PIO0, p.PIN_27, p.PIN_26, tx_buf, rx_buf, Irqs);
+    let uart_receiver =
+        BufferedUart::new_full_duplex(p.PIO0, p.PIN_27, p.PIN_26, tx_buf, rx_buf, Irqs);
 
     // Initialize the storage and keymap
     let mut keymap_data = KeymapData::new(keymap::get_default_keymap());
@@ -241,23 +243,25 @@ async fn main(_spawner: Spawner) {
     //let mut matrix = DirectPinMatrix::<_, _, 9, 4, 36>::new(direct_pins, debouncer, true);
     let mut matrix = DirectPinMatrix::<_, _, ROW, COL, 40>::new(direct_pins, debouncer, true);
     let mut keyboard = Keyboard::new(&keymap);
-    let host_ctx = rmk::host::KeyboardContext::new(&keymap);
-    let mut host_service = HostService::new(&host_ctx, &rmk_config);
+    let mut host_service = HostService::new(&keymap, &rmk_config);
 
-    let mut usb_transport = UsbTransport::new(driver, rmk_config.device_config);
+    let mut usb_transport =
+        UsbTransport::new(driver, rmk_config.device_config).with_host_service(&host_service);
     let mut wpm_processor = WpmProcessor::new();
 
     // Start
     join(
-        run_all!(
-            matrix,
-            storage,
-            usb_transport,
-            wpm_processor,
-            keyboard,
-            host_service
+        run_all!(matrix, storage, usb_transport, wpm_processor, keyboard,),
+        run_peripheral_manager(
+            0,
+            uart_receiver,
+            PeripheralMatrixConfig {
+                rows: ROW as u8,
+                cols: COL as u8,
+                row_offset: 8,
+                col_offset: 0,
+            },
         ),
-        run_peripheral_manager::<ROW, COL, 8, 0, _>(0, uart),
     )
     .await;
 }

@@ -16,8 +16,8 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW*2]; NUM_LAYER] {
       [k!(Delete), k!(O), k!(Dot), k!(I), k!(No)],      // Col 3 (now Row 3)
       [k!(LCtrl), k!(U), k!(Comma), k!(Quote), k!(No)], // Col 4 (now Row 4)
       [k!(LAlt), k!(RAlt), mo!(1), k!(LShift), k!(No)], // Col 5 (now Row 5)
-      [k!(Equal), k!(Escape), k!(LGui), k!(Slash), k!(No)], // Col 6 (now Row 6)
-      [k!(Up), k!(Down), k!(Left), k!(Right), k!(No)],  // Col 7 (now Row 7)
+      [k!(Equal), k!(LGui), k!(Escape), k!(Slash), k!(LGui)], // Col 6 (now Row 6)
+      [k!(Up), k!(Down), k!(Right), k!(Left),  k!(No)],  // Col 7 (now Row 7)
       // Right
       [k!(X), k!(Q), k!(B), k!(MouseBtn1), k!(No)],
       [k!(P), k!(D), k!(F), k!(H), k!(No)],       // Col 1 (now Row 1)
@@ -25,7 +25,7 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW*2]; NUM_LAYER] {
       [k!(Tab), k!(N), k!(L), k!(J), k!(No)],      // Col 3 (now Row 3)
       [k!(RCtrl), k!(S), k!(Y), k!(Semicolon), k!(No)], // Col 4 (now Row 4)
       [k!(RAlt), k!(MouseBtn2), k!(RShift), mo!(1), k!(No)], // Col 5 (now Row 5)
-      [k!(Minus), mo!(3), k!(Backslash), k!(RGui), k!(No)], // Col 6 (now Row 6)
+      [k!(Minus), mo!(2), k!(Backslash), k!(Escape), k!(LGui)], // Col 6 (now Row 6)
       [k!(MouseUp), k!(MouseDown), k!(MouseLeft), k!(MouseRight), k!(MouseBtn1)],  // Col 7 (now Row 7)
     ],
     [
@@ -41,7 +41,7 @@ pub const fn get_default_keymap() -> [[[KeyAction; COL]; ROW*2]; NUM_LAYER] {
       // Right
       [k!(LeftBracket), k!(RightBracket), k!(Kc0), k!(Kc9), k!(No)],
       [k!(Kc8), k!(Kc0), k!(Kc7), k!(Kc9), k!(No)],       // Col 1 (now Row 1)
-      [k!(No), k!(Kc2), k!(Kc1), k!(No), k!(No)], // Col 2 (now Row 2)
+      [k!(No), k!(Kc2), k!(Kc1), k!(Kc3), k!(No)], // Col 2 (now Row 2)
       [k!(No), k!(Kc5), k!(Kc4), k!(Kc6), k!(No)],      // Col 3 (now Row 3)
       [k!(No), k!(Dot), k!(Equal), k!(No), k!(No)], // Col 4 (now Row 4)
       [k!(No), k!(MouseBtn2), k!(RShift), mo!(1), mo!(1)], // Col 5 (now Row 5)
